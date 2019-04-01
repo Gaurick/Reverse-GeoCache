@@ -1,3 +1,76 @@
+//below are the variables for the location.
+//coordinates MUST be in degrees.
+float Lat1 = 33.761685;
+float Long1 = -82.278742;
+//first location.
+float Lat2 = 33.762728;
+float Long2 = -82.280019;
+//second location.
+float Lat3 = 33.761811;
+float Long3 = -82.280744;
+//third location.
+float Lat4 = 33.759503;
+float Long4 = -82.282178;
+//fourth location.
+float Lat5 = 33.759886;
+float Long5 = -82.282886;
+//fifth location.
+float Lat6 = 33.760142;
+float Long6 = -82.283031;
+//sixth location.
+float Lat7 = 33.759531;
+float Long7 = -82.281453;
+//seventh location.
+float Lat8 = 33.760242;
+float Long8 = -82.279994;
+//eigth location.
+float Lat9 = 33.761472;
+float Long9 = -82.278050;
+//ninth location.
+
+//messages displayed on the way to the locations.
+//must be only 16 characters, and needs quotes at beginning and end of word(s).
+String locWords1 = "1st point";
+//words displayed on the way to the first point.
+String locWords2 = "2nd point";
+//words displayed on the way to the first point.
+String locWords3 = "3rd point";
+//words displayed on the way to the first point.
+String locWords4 = "4th point";
+//words displayed on the way to the first point.
+String locWords5 = "5th point";
+//words displayed on the way to the first point.
+String locWords6 = "6th point";
+//words displayed on the way to the first point.
+String locWords7 = "7th point";
+//words displayed on the way to the first point.
+String locWords8 = "8th point";
+//words displayed on the way to the first point.
+String locWords9 = "finish";
+//words displayed at last location.
+String locWords10 = "end.";
+//second line of words at last location.
+
+//distance units.
+//delete the double slashes before the const, string, and int lines to use that unit.
+//make sure there are the double slashes before all the other options.
+const float rEarth = 20903251;
+String mEarth = "ft";
+int dThreshold = 30;
+//display distance and units in feet.
+//const float rEarth = 6371000000;
+//String mEarth = "m";
+//int dThreshold = 10;
+//display distance and units in meters.
+//const float rEarth = 6371;
+//String mEarth = "km";
+//int dThreshold = 1;
+//display distance and units in kilometers
+//const float rEarth = 3958.8;
+//String mEarth = "mi";
+//int dThreshold = .5;
+//display distance and units in miles.
+
 /*  my own take on the reverse geocache box.
  *  heavily used the following info...
  *  https://learn.adafruit.com/reverse-geocache-engagement-box
@@ -38,10 +111,6 @@
  *  other side gnd.
  *  middle to VO on the lcd display.
  *  
- *  change the Lat2 and Long2 to the decimal latitude and longitude of the place to unlock the box.
- *  distance from the destination is measured in meters.
- *  changes rEarth to the radius of earth in whatever measurement you'd prefer.
- *  
  *  v 1.0 first finished 9/19/18.
  *  
  *  v 1.1 finished 10/23/18.
@@ -54,9 +123,35 @@
  *  set update for lcd and all steps to every second instead of every 2 seconds.
  *  more comments.
  *  probably more that i can't remember.
- * 
+ *  
+ *  v1.2 finished 3/26/19.
+ *  changed meters to feet.
+ *  added a bunch of locations.
+ *  changed "distance to" words to things to pray for.
+ *  hope it works out in the field.
+ *  
+ *  v1.3 finished 4/1/19.
+ *  actually took it to the field and found some issues to fix.
+ *  moved latitude and longitude global variables to very top of program.
+ *  removed conversion of degrees to radians from the global variables and added it to the setup.
+ *  put measurements in feet, meters, kilometers, and miles up at the top.
+ *  commented out the other distance measurement options.
+ *  put in variable for the unit measuring distance.
+ *  added in global variable for threshold of distance to a point and put specific values for each of the distances.
+ *  reduced timer before locking at the beginning to 5 seconds.
+ *  put global variables for the words that show up when the locations are reached, for instructions/inspiration/whatever.
+ *  put instructions on how to set it yourself up top with the variables.
+ *  changed the stages function to just check the distance vs threshold then either show message and distance or advance to the next step.
+ *  loop has the switch case for the locations now.
+ *  
+ *  to do
+ *  put in a beeper for feedback of reaching the location and it's time for the other one?
+ *  (might not be needed since forgot to put in servo wiggle for reaching the points past number 2.)
+ *  put in some kind of direction indicator?
+ *  (hot/cold game seems to be fun for the wife, so probably won't do.
+ *  build box within box.
+ *  (to protect electronics and make the locking step not necessary.)
  */
-
 
 #include <LiquidCrystal.h>
 //library for the lcd display.
@@ -68,7 +163,6 @@
 //library for the servo.
 #include <math.h>
 //library for the fancy maths.
-
 
 LiquidCrystal lcd(7, 8, 6, 10, 11, 12);
 //set the pins on the arduino to the pins on the lcd display.
@@ -86,20 +180,6 @@ PWMServo myservo;
 int pos = 0;
 //variable to store the servo position.
 
-float Lat1 = 33.761685 * 0.0174533;
-float Long1 = -82.278742 * 0.0174533;
-//gps location of the first point needed to unlock the box.
-float Lat2 = 33.761450 * 0.0174533;
-float Long2 = -82.278070 * 0.0174533;
-//gps location of the second point needed to unlock the box.
-float Lat3 = 33.761685 * 0.0174533;
-float Long3 = -82.278742 * 0.0174533;
-//gps location of the first point needed to unlock the box.
-//needs to be in decimal degrees and not in the standard way.
-//then convert the degrees to radians.
-const float rEarth = 6371000.0;
-//radius of the earth.
-//in meters
 bool lock = 0;
 //variable to track if it's been closer than 20 meters to the location.
 int d = 0;
@@ -109,9 +189,8 @@ int steps = 0;
 //variable to track what's been done.
 int counter = 0;
 //counter variable to be used to count.
-
 float h = 0;
-
+//variable to hold the distance equation result.
 
 void setup() {
   lcd.begin(16, 2);
@@ -125,7 +204,6 @@ void setup() {
   myservo.attach(SERVO_PIN_A);
   //set the servo to pin A which is 9 on the uno by default.
 
-
   GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
   //turns on RMS (recommended minimum) and GGA (fix data).
   GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
@@ -138,6 +216,26 @@ void setup() {
 
   myservo.write(0);
   //move the servo to the closed position. 
+
+  Lat1 = Lat1 * 0.0174533;
+  Long1 = Long1 * 0.0174533;
+  Lat2 = Lat2 * 0.0174533;
+  Long2 = Long2 * 0.0174533;
+  Lat3 = Lat3 * 0.0174533;
+  Long3 = Long3 * 0.0174533;
+  Lat4 = Lat4 * 0.0174533;
+  Long4 = Long4 * 0.0174533;
+  Lat5 = Lat5 * 0.0174533;
+  Long5 = Long5 * 0.0174533;
+  Lat6 = Lat6 * 0.0174533;
+  Long6 = Long6 * 0.0174533;
+  Lat7 = Lat7 * 0.0174533;
+  Long7 = Long7 * 0.0174533;
+  Lat8 = Lat8 * 0.0174533;
+  Long8 = Long8 * 0.0174533;
+  Lat9 = Lat9 * 0.0174533;
+  Long9 = Long9 * 0.0174533;
+  //convert all lat and long from degrees to radians for the distance calculations.
   
   Serial.println("Start");
   //test of the serial output, also end of the setup part.
@@ -188,61 +286,110 @@ void loop() {
     //about every 2 seconds print the update.
     timer = millis(); 
     // reset the timer
-    if(counter == 16){
+    if(counter == 6){
       counter = 0;
     }
 
     else{
       counter ++;
     }
-    
-    stages();
+
+    switch (steps) {
+      case 0:
+      //stage to allow person time to put things into the box before it locks.
+      if(counter < 5){
+        //if the count down is still counting, show it.
+        lcd.clear();
+        lcd.print("Locking in");
+        lcd.setCursor(0, 1);
+        lcd.print(5 - counter);
+        myservo.write(180);
+      }
+
+      else{
+        //if the count down is done counting lock the box and move to the next step.
+        myservo.write(0);
+        steps ++;
+      }
+      break;
+
+      case 1:
+      if(GPS.fix){
+        //if the gps unit has a fix on it's current location, skip this step.
+        steps ++;
+      }
+
+      else{
+        //if the gps isn't connected, say so.
+        lcd.clear();
+        lcd.print("Acquiring");
+        lcd.setCursor(0, 1);
+        lcd.print("signal");
+      }
+      break;
+
+      case 2:
+      distance(Lat1, Long1);
+      stages(locWords1);
+      break;
+
+      case 3:
+      distance(Lat2, Long2);
+      stages(locWords2);
+      break;
+
+      case 4:
+      distance(Lat3, Long3);
+      stages(locWords3);
+      break;
+
+      case 5:
+      distance(Lat4, Long4);
+      stages(locWords4);
+      break;
+
+      case 6:
+      distance(Lat5, Long5);
+      stages(locWords5);
+      break;
+
+      case 7:
+      distance(Lat6, Long6);
+      stages(locWords6);
+      break;
+
+      case 8:
+      distance(Lat7, Long7);
+      stages(locWords7);
+      break;
+
+      case 9:
+      distance(Lat8, Long8);
+      stages(locWords8);
+      break;
+
+      case 10:
+      distance(Lat9, Long9);
+      stages(locWords9);
+      break;
+
+      case 11:
+      //if the final point is close enough to open, open the box.
+      lcd.clear();
+      lcd.print(locWords9);
+      lcd.setCursor(0, 1); 
+      lcd.print(locWords10);
+      myservo.write(180);
+      //move the servo to open the box.
+      break;   
+    }
   }
 }
 
 
-void stages(){
-  switch (steps){
-    case 0:
-    //stage to allow person time to put things into the box before it locks.
-    if(counter < 15){
-      //if the count down is still counting, show it.
-      lcd.clear();
-      lcd.print("Locking in");
-      lcd.setCursor(0, 1);
-      lcd.print(15 - counter);
-      myservo.write(180);
-    }
-
-    else{
-      //if the count down is done counting lock the box and move to the next step.
-      myservo.write(0);
-      steps ++;
-    }
-    break;
-
-    case 1:
-    if(GPS.fix){
-      //if the gps unit has a fix on it's current location, skip this step.
-      steps ++;
-    }
-
-    else{
-      //if the gps isn't connected, say so.
-      lcd.clear();
-      lcd.print("Acquiring");
-      lcd.setCursor(0, 1);
-      lcd.print("signal");
-    }
-    break;
-    
-
-    case 2:
-    //run the first location into the distance calculation function to figure out how far you're from the first point.
-    distance(Lat1, Long1);
-    
-    if(d < 20){
-      //if you're within 20 meters, move on to the unlock step.
+void stages(String locWords){
+    if(d < dThreshold){
+      //if you're within the distance threshold, move on to the unlock step.
       steps ++;
       //wiggle the servo to make a noise that you've moved to the next step.
       myservo.write(10);
@@ -251,70 +398,14 @@ void stages(){
     }
 
     else{ 
-      //further than 20 meters.
+      //further than distance threshold.
       lcd.clear();
-      lcd.print("Distance to 1=");
+      lcd.print(locWords);
       lcd.setCursor(0, 1);
       lcd.print(d);
-      lcd.print(" m");
+      lcd.print(mEarth);
       //tell the person how far to go.   
-    }
-    break;
-
-    case 3:
-    //feed the second location into the distance function to see how far you are from it.
-    distance(Lat2, Long2);
-      
-    if(d < 20){
-      //if you're within 20 meters, move on to the unlock step.
-      steps ++;
-      //wiggle the servo to make a noise that you've moved to the next step.
-      myservo.write(10);
-      delay(250);
-      myservo.write(0);
-    }
-
-    else{ 
-      //further than 20 meters.
-      lcd.clear();
-      lcd.print("Distance to 2=");
-      lcd.setCursor(0, 1);
-      lcd.print(d);
-      lcd.print(" m");
-      //tell the person how far to go.   
-    }
-    break;
-
-    case 4:
-    //feed the third location to the distance function to figure out how far it is from you.
-    distance(Lat3, Long3);
-      
-    if(d < 20){
-      //if you're within 20 meters, move on to the unlock step.
-      steps ++;
-    }
-
-    else{ 
-      //further than 20 meters.
-      lcd.clear();
-      lcd.print("Distance to 3=");
-      lcd.setCursor(0, 1);
-      lcd.print(d);
-      lcd.print(" m");
-      //tell the person how far to go.   
-    }
-    break;
-
-    case 5:
-    //if the final point is close enough to open, open the box.
-    lcd.clear();
-    lcd.print("The box is");
-    lcd.setCursor(0, 1); 
-    lcd.print("now unlocked.");
-    myservo.write(180);
-    //move the servo to open the box.
-    break;   
-  }
+    }    
 }
 
 void distance(float lat2, float long2){
