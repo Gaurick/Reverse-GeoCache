@@ -3,27 +3,35 @@
 float Lat1 = 33.761685;
 float Long1 = -82.278742;
 //first location.
+
 float Lat2 = 33.762728;
 float Long2 = -82.280019;
 //second location.
+
 float Lat3 = 33.761811;
 float Long3 = -82.280744;
 //third location.
+
 float Lat4 = 33.759503;
 float Long4 = -82.282178;
 //fourth location.
+
 float Lat5 = 33.759886;
 float Long5 = -82.282886;
 //fifth location.
+
 float Lat6 = 33.760142;
 float Long6 = -82.283031;
 //sixth location.
+
 float Lat7 = 33.759531;
 float Long7 = -82.281453;
 //seventh location.
+
 float Lat8 = 33.760242;
 float Long8 = -82.279994;
 //eigth location.
+
 float Lat9 = 33.761472;
 float Long9 = -82.278050;
 //ninth location.
@@ -58,14 +66,17 @@ const float rEarth = 20903251;
 String mEarth = "ft";
 int dThreshold = 30;
 //display distance and units in feet.
+
 //const float rEarth = 6371000000;
 //String mEarth = "m";
 //int dThreshold = 10;
 //display distance and units in meters.
+
 //const float rEarth = 6371;
 //String mEarth = "km";
 //int dThreshold = 1;
 //display distance and units in kilometers
+
 //const float rEarth = 3958.8;
 //String mEarth = "mi";
 //int dThreshold = .5;
@@ -143,14 +154,15 @@ int dThreshold = 30;
  *  put instructions on how to set it yourself up top with the variables.
  *  changed the stages function to just check the distance vs threshold then either show message and distance or advance to the next step.
  *  loop has the switch case for the locations now.
+ *
+ *  v1.31 finished 8/22/20.
+ *  cleaned up the formatting of the locations above.
+ *  cleaned up the formatting for the location words above.
+ *  removed a few to do's.
  *  
  *  to do
  *  put in a beeper for feedback of reaching the location and it's time for the other one?
- *  (might not be needed since forgot to put in servo wiggle for reaching the points past number 2.)
- *  put in some kind of direction indicator?
- *  (hot/cold game seems to be fun for the wife, so probably won't do.
  *  build box within box.
- *  (to protect electronics and make the locking step not necessary.)
  */
 
 #include <LiquidCrystal.h>
